@@ -1,0 +1,31 @@
+name: tests
+
+# 设置触发工作流的事件：在main分支上发生推送与拉取请求时触发
+on:
+  push:
+
+# 定义工作流程
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+
+      # 缓存Maven包，避免重复下载，提高构建速度
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      # 运行Maven测试
+      - name: Run tests with Maven
+        run: mvn -B test --file pom.xml
+
